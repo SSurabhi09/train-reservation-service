@@ -20,7 +20,8 @@ train-reservation-service/internal
 #### Method Requests
 
 1. POST : http://localhost:7090/v1/reservations
-   Body:
+
+         Body:
    {"reservation":{"user":{"first_name":"John","last_name":"Doe","email":"johndoe@example.com"},
    "ticket":{"from":"London","to":"France","seat":"2A"}}}
    Response:
@@ -29,8 +30,9 @@ train-reservation-service/internal
    "message": "Reservation created successfully",
    "reservationId": "johndoe@example.com-1"
    }
-2. GET : http://localhost:7090/v1/reservations/{reservation_id}
-   Response:
+3. GET : http://localhost:7090/v1/reservations/{reservation_id}
+
+         Response:
       {
          "success": true,
          "message": "Reservation details fetched successfully",
