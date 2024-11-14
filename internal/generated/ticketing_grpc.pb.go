@@ -19,8 +19,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	TicketingService_CreateReservation_FullMethodName = "/ticketing.TicketingService/CreateReservation"
-	TicketingService_GetReservation_FullMethodName    = "/ticketing.TicketingService/GetReservation"
+	TicketingService_CreateReservation_FullMethodName  = "/ticketing.TicketingService/CreateReservation"
+	TicketingService_GetReservation_FullMethodName     = "/ticketing.TicketingService/GetReservation"
+	TicketingService_GetSeatAllocations_FullMethodName = "/ticketing.TicketingService/GetSeatAllocations"
+	TicketingService_DeleteReservation_FullMethodName  = "/ticketing.TicketingService/DeleteReservation"
+	TicketingService_UpdateReservation_FullMethodName  = "/ticketing.TicketingService/UpdateReservation"
 )
 
 // TicketingServiceClient is the client API for TicketingService service.
@@ -32,6 +35,9 @@ type TicketingServiceClient interface {
 	// A service method to reserve a ticket
 	CreateReservation(ctx context.Context, in *CreateReservationRequest, opts ...grpc.CallOption) (*CreateReservationResponse, error)
 	GetReservation(ctx context.Context, in *GetReservationRequest, opts ...grpc.CallOption) (*GetReservationResponse, error)
+	GetSeatAllocations(ctx context.Context, in *GetSeatAllocatedRequest, opts ...grpc.CallOption) (*GetSeatAllocatedResponse, error)
+	DeleteReservation(ctx context.Context, in *DeleteReservationRequest, opts ...grpc.CallOption) (*DeleteReservationResponse, error)
+	UpdateReservation(ctx context.Context, in *UpdateReservationRequest, opts ...grpc.CallOption) (*UpdateReservationResponse, error)
 }
 
 type ticketingServiceClient struct {
@@ -62,6 +68,36 @@ func (c *ticketingServiceClient) GetReservation(ctx context.Context, in *GetRese
 	return out, nil
 }
 
+func (c *ticketingServiceClient) GetSeatAllocations(ctx context.Context, in *GetSeatAllocatedRequest, opts ...grpc.CallOption) (*GetSeatAllocatedResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetSeatAllocatedResponse)
+	err := c.cc.Invoke(ctx, TicketingService_GetSeatAllocations_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ticketingServiceClient) DeleteReservation(ctx context.Context, in *DeleteReservationRequest, opts ...grpc.CallOption) (*DeleteReservationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteReservationResponse)
+	err := c.cc.Invoke(ctx, TicketingService_DeleteReservation_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ticketingServiceClient) UpdateReservation(ctx context.Context, in *UpdateReservationRequest, opts ...grpc.CallOption) (*UpdateReservationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateReservationResponse)
+	err := c.cc.Invoke(ctx, TicketingService_UpdateReservation_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TicketingServiceServer is the server API for TicketingService service.
 // All implementations must embed UnimplementedTicketingServiceServer
 // for forward compatibility.
@@ -71,6 +107,9 @@ type TicketingServiceServer interface {
 	// A service method to reserve a ticket
 	CreateReservation(context.Context, *CreateReservationRequest) (*CreateReservationResponse, error)
 	GetReservation(context.Context, *GetReservationRequest) (*GetReservationResponse, error)
+	GetSeatAllocations(context.Context, *GetSeatAllocatedRequest) (*GetSeatAllocatedResponse, error)
+	DeleteReservation(context.Context, *DeleteReservationRequest) (*DeleteReservationResponse, error)
+	UpdateReservation(context.Context, *UpdateReservationRequest) (*UpdateReservationResponse, error)
 	mustEmbedUnimplementedTicketingServiceServer()
 }
 
@@ -86,6 +125,15 @@ func (UnimplementedTicketingServiceServer) CreateReservation(context.Context, *C
 }
 func (UnimplementedTicketingServiceServer) GetReservation(context.Context, *GetReservationRequest) (*GetReservationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetReservation not implemented")
+}
+func (UnimplementedTicketingServiceServer) GetSeatAllocations(context.Context, *GetSeatAllocatedRequest) (*GetSeatAllocatedResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSeatAllocations not implemented")
+}
+func (UnimplementedTicketingServiceServer) DeleteReservation(context.Context, *DeleteReservationRequest) (*DeleteReservationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteReservation not implemented")
+}
+func (UnimplementedTicketingServiceServer) UpdateReservation(context.Context, *UpdateReservationRequest) (*UpdateReservationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateReservation not implemented")
 }
 func (UnimplementedTicketingServiceServer) mustEmbedUnimplementedTicketingServiceServer() {}
 func (UnimplementedTicketingServiceServer) testEmbeddedByValue()                          {}
@@ -144,6 +192,60 @@ func _TicketingService_GetReservation_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TicketingService_GetSeatAllocations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSeatAllocatedRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TicketingServiceServer).GetSeatAllocations(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TicketingService_GetSeatAllocations_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TicketingServiceServer).GetSeatAllocations(ctx, req.(*GetSeatAllocatedRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TicketingService_DeleteReservation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteReservationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TicketingServiceServer).DeleteReservation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TicketingService_DeleteReservation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TicketingServiceServer).DeleteReservation(ctx, req.(*DeleteReservationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TicketingService_UpdateReservation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateReservationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TicketingServiceServer).UpdateReservation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TicketingService_UpdateReservation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TicketingServiceServer).UpdateReservation(ctx, req.(*UpdateReservationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TicketingService_ServiceDesc is the grpc.ServiceDesc for TicketingService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -158,6 +260,18 @@ var TicketingService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetReservation",
 			Handler:    _TicketingService_GetReservation_Handler,
+		},
+		{
+			MethodName: "GetSeatAllocations",
+			Handler:    _TicketingService_GetSeatAllocations_Handler,
+		},
+		{
+			MethodName: "DeleteReservation",
+			Handler:    _TicketingService_DeleteReservation_Handler,
+		},
+		{
+			MethodName: "UpdateReservation",
+			Handler:    _TicketingService_UpdateReservation_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

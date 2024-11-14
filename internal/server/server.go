@@ -23,6 +23,12 @@ var (
 	reservationStore = make(map[string]*generated.Reservation)
 )
 
+// used for internal API to get all reservations
+type getAllReservationResponse struct {
+    Reservations []*generated.Reservation `json:"reservations"`
+}
+
+
 // Implement the CreateReservation method
 func (s *ticketingServer) CreateReservation(ctx context.Context, req *generated.CreateReservationRequest) (
 	*generated.CreateReservationResponse, error) {
@@ -41,7 +47,14 @@ func (s *ticketingServer) CreateReservation(ctx context.Context, req *generated.
 	if req.Reservation.User == nil {
 		return nil, fmt.Errorf("user information is missing")
 	}
-
+	for v := range reservationStore {
+		currenDetails := reservationStore[v]
+		if currenDetails.Ticket.From == req.Reservation.Ticket.From && 
+		currenDetails.User.Email == req.Reservation.User.Email &&
+		currenDetails.Ticket.Seat == req.Reservation.Ticket.Seat {
+            return nil, fmt.Errorf("a reservation for the given user and ticket already exists")
+        }
+	}
 	// Logging the request fields
 	fmt.Printf("Creating reservation for %s\n", req.Reservation.User.Email)
 	reservationID := fmt.Sprintf("%s-%d", req.Reservation.User.Email,len(reservationStore)+1)
@@ -60,9 +73,10 @@ func (s *ticketingServer) CreateReservation(ctx context.Context, req *generated.
 // GetReservation will return the reservation details based on reservation ID
 func (s *ticketingServer) GetReservation(ctx context.Context, req *generated.GetReservationRequest) (
 	*generated.GetReservationResponse, error) {
-
 	// Fetch the reservation based on the provided ID
 	reservation, exists := reservationStore[req.ReservationId]
+	// Debug logs
+	fmt.Println("reservationStore--> server", reservationStore)
 	if !exists {
 		return nil, fmt.Errorf("reservation with ID %s not found", req.ReservationId)
 	}
@@ -73,6 +87,109 @@ func (s *ticketingServer) GetReservation(ctx context.Context, req *generated.Get
 		Message:          "Reservation details fetched successfully",
 		ReservationDetails: reservation,
 	}, nil
+}
+
+// getAllReservations will return the reservation details of all reservations
+// internal method
+func (s *ticketingServer) getAllReservations() (
+	*getAllReservationResponse, error) {
+	if len(reservationStore) == 0 {
+		return nil, fmt.Errorf("no reservations found")
+	}
+	var responses []*generated.Reservation
+	for _, reservation := range reservationStore{
+		response := &generated.Reservation{
+            User: reservation.User,
+            Ticket: reservation.Ticket,
+        }
+        responses = append(responses, response)
+	}
+	fmt.Println(responses)
+	return &getAllReservationResponse{
+		Reservations: responses,
+	}, nil
+}
+
+// GetSeatAllocations retrieves the list of users and their allocated seats for a specific section
+func (s *ticketingServer) GetSeatAllocations(ctx context.Context,
+	section *generated.GetSeatAllocatedRequest) (
+	*generated.GetSeatAllocatedResponse, error) {
+	if len(reservationStore) == 0 {
+		return nil, fmt.Errorf("no reservations found")
+	}
+	allReservations, err := s.getAllReservations()
+	if err!= nil {
+        return nil, fmt.Errorf("error getting all reservations: %v", err)
+    }
+	var seatAllocated []*generated.SeatAllocated
+    for _, reservation := range allReservations.Reservations {
+        if reservation.Ticket.Seat[len(reservation.Ticket.Seat)-1:] == section.Section {
+            // append User to seatAllocated array
+            seatAllocated = append(seatAllocated, &generated.SeatAllocated{
+                User: reservation.User,
+                Seat: reservation.Ticket.Seat,
+            })
+        }
+    }
+	fmt.Println(seatAllocated)
+	return &generated.GetSeatAllocatedResponse{
+		SeatAllocated: seatAllocated,
+	}, nil
+}
+
+// GetSeatAllocations retrieves the list of users and their allocated seats for a specific section
+func (s *ticketingServer) DeleteReservation(ctx context.Context,
+	req *generated.DeleteReservationRequest) (
+	*generated.DeleteReservationResponse, error) {
+	if len(reservationStore) == 0 {
+		return nil, fmt.Errorf("no reservations found")
+	}
+	// Fetch the reservation based on the provided ID
+	_, exists := reservationStore[req.ReservationId]
+	// Debug logs
+	fmt.Println("reservationStore--> server", reservationStore)
+	if !exists {
+		return nil, fmt.Errorf("reservation with ID %s not found", req.ReservationId)
+	}
+	// Remove the reservation from the in-memory store
+	delete(reservationStore, req.ReservationId)
+    // Returning the mock response
+    fmt.Println("Reservation deleted")
+    fmt.Println("reservation deleted:", req.ReservationId)
+    // Returning the found reservation details
+    return &generated.DeleteReservationResponse{
+        Success: true,
+        Message: "Reservation deleted successfully",
+    }, nil
+}
+
+func(s *ticketingServer) UpdateReservation(ctx context.Context,
+	updateReq *generated.UpdateReservationRequest) (
+		*generated.UpdateReservationResponse, error){
+		// Fetch the reservation based on the provided ID
+		reservation, exists := reservationStore[updateReq.ReservationId]
+		if !exists {
+			return &generated.UpdateReservationResponse{
+                Success: false,
+                Message: "Reservation with ID not found",
+            }, nil
+		}
+		// Update the reservation details
+        reservation.Ticket.Seat = updateReq.NewReservation.Seat
+
+        // Debug logs
+        fmt.Println("reservationStore--> server", reservationStore)
+        // Returning the mock response
+        fmt.Println("Reservation updated")
+        fmt.Println("reservation updated:", updateReq.ReservationId)
+        // Returning the found reservation details
+        // Returning a success response as the update is successful
+        // In a real-world scenario, this should also include the updated reservation details in the response.
+        // For simplicity, we are returning a success response here.
+        return &generated.UpdateReservationResponse{
+            Success: true,
+            Message: "Reservation updated successfully",
+        }, nil
 }
 
 func main() {

@@ -4,6 +4,7 @@ package ticketing;
 
 option go_package = "/generated;ticketing";
 import "google/api/annotations.proto";
+//import "google/protobuf/empty.proto";  // Import the empty message
 
 
 // Message for a Train Reservation Request
@@ -48,6 +49,46 @@ message GetReservationResponse {
     Reservation reservation_details = 3; // Reservation
 }
 
+message GetSeatAllocatedRequest {
+   string section = 1;
+}
+
+message GetSeatAllocatedResponse {
+    repeated SeatAllocated seat_allocated = 1;
+}
+
+message SeatAllocated {
+    User user = 1;
+    string seat = 2;
+}
+
+message DeleteReservationRequest {
+    string reservation_id = 1;
+}
+
+message DeleteReservationResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+message UpdateReservationRequest {
+    string reservation_id = 1;
+    UserReservation new_reservation = 2; // New reservation details to update the existing one
+}
+
+// user details will remain intact in update
+// modify only the ticket reservation
+message UserReservation {
+    string from= 1;
+    string  to= 2;
+    string seat = 3;
+}
+
+message UpdateReservationResponse {
+    bool success = 1;
+    string message = 2;
+}
+
 //Ticketing Service
 service TicketingService {
     // A service method to reserve a ticket
@@ -61,6 +102,25 @@ service TicketingService {
     rpc GetReservation (GetReservationRequest) returns (GetReservationResponse) {
         option (google.api.http) = {
             get: "/v1/reservations/{reservation_id}"
+        };
+    }
+
+    rpc GetSeatAllocations (GetSeatAllocatedRequest) returns (GetSeatAllocatedResponse) {
+        option (google.api.http) = {
+            get: "/v1/seat_allocations/{section}"
+        };
+    }
+
+    rpc DeleteReservation (DeleteReservationRequest) returns (DeleteReservationResponse) {
+        option (google.api.http) = {
+            delete: "/v1/reservations/{reservation_id}"
+        };
+    }
+
+    rpc UpdateReservation (UpdateReservationRequest) returns (UpdateReservationResponse) {
+        option (google.api.http) = {
+            put: "/v1/reservations/{reservation_id}"
+            body: "*"  // Indicate the field that will be used for the request body
         };
     }
 }
