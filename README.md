@@ -22,10 +22,10 @@ train-reservation-service/internal
 
 1.  POST : http://localhost:7090/v1/reservations
 
-               Body:
+          Body:
                {"reservation":{"user":{"first_name":"John","last_name":"Doe","email":"johndoe@example.com"},
                "ticket":{"from":"London","to":"France","seat":"2A"}}}
-               Response:
+          Response:
                {
                "success": true,
                "message": "Reservation created successfully",
@@ -49,17 +49,18 @@ train-reservation-service/internal
                }
 
 3.  Delete : http://localhost:7090/v1/reservations/{reservation_id}
-    Response:
-    {
-    "success": true,
-    "message": "Reservation deleted successfully"
-    }
+
+         Response:
+               {
+               "success": true,
+               "message": "Reservation deleted successfully"
+               }
 
 4.  Update : http://localhost:7090/v1/reservations/{reservation_id}
 
-               Body:
+          Body:
                {"new_reservation":{"seat":"2B"}}
-               Response:
+          Response:
                {
                "success": true,
                "message": "Reservation updated successfully"
